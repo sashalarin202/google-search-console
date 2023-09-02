@@ -33,55 +33,6 @@ export class AuthService {
       }
     });
   }
-  // // Sign in with email/password
-  // SignIn(email: string, password: string) {
-  //   return this.afAuth
-  //     .signInWithEmailAndPassword(email, password)
-  //     .then((result) => {
-  //       this.SetUserData(result.user);
-  //       this.afAuth.authState.subscribe((user) => {
-  //         if (user) {
-  //           this.router.navigate(['dashboard']);
-  //         }
-  //       });
-  //     })
-  //     .catch((error) => {
-  //       this.snackBar.open(error.message, '', { duration: 3000 })
-  //     });
-  // }
-  // // Sign up with email/password
-  // SignUp(email: string, password: string) {
-  //   return this.afAuth
-  //     .createUserWithEmailAndPassword(email, password)
-  //     .then((result) => {
-  //       /* Call the SendVerificaitonMail() function when new user sign 
-  //       up and returns promise */
-  //       this.SendVerificationMail();
-  //       this.SetUserData(result.user);
-  //     })
-  //     .catch((error) => {
-  //       this.snackBar.open(error.message, '', { duration: 3000 });
-  //     });
-  // }
-  // // Send email verfificaiton when new user sign up
-  // SendVerificationMail() {
-  //   return this.afAuth.currentUser
-  //     .then((u: any) => u.sendEmailVerification())
-  //     .then(() => {
-  //       this.router.navigate(['verify-email-address']);
-  //     });
-  // }
-  // // Reset Forggot password
-  // ForgotPassword(passwordResetEmail: string) {
-  //   return this.afAuth
-  //     .sendPasswordResetEmail(passwordResetEmail)
-  //     .then(() => {
-  //       this.snackBar.open('Password reset email sent, check your inbox.', '', { duration: 3000 });
-  //     })
-  //     .catch((error) => {
-  //       this.snackBar.open(error.message, '', { duration: 3000 });
-  //     });
-  // }
   // Returns true when user is looged in and email is verified
   get isLoggedIn(): boolean {
     const user = JSON.parse(localStorage.getItem('user')!);
