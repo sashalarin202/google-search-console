@@ -19,6 +19,10 @@ import { AngularFireDatabaseModule } from '@angular/fire/compat/database';
 import { environment } from '../environments/environment';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { MainPageComponent } from './components/main-page/main-page.component';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+
 
 
 
@@ -35,6 +39,9 @@ import { MainPageComponent } from './components/main-page/main-page.component';
     MainPageComponent,
   ],
   imports: [
+    MatSortModule,
+    MatPaginatorModule,
+    MatTableModule,
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
