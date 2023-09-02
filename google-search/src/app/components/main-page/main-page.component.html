@@ -1,13 +1,18 @@
-<button 
-    mat-raised-button
-    *ngIf="isLoggedIn(); else LoggedIn"
-    class="mat-dialog-btn mat-dialog-googleBtn" 
-    (click)="authService.GoogleAuth()" 
-    [mat-dialog-close]>
-    <div class="wrapper">
-        <p>Conect Google Search Console</p>
+<div class="container" *ngIf="isLoggedIn(); else LoggedIn">
+    <button 
+        mat-button
+        class="mat-dialog-btn" 
+        (click)="authService.GoogleAuth()" 
+        [mat-dialog-close]>
+        <div class="wrapper">
+            <p>Conect Google Search Console</p>
+        </div>
+    </button>
+    <div class="container-discription">
+        <img src="../../../assets/lock.jpg" alt="">
+        <p>Secure API connection. Only keywords and their position will be accessible to the platform. No other access right</p>
     </div>
-</button>
+  </div>
 
 <ng-template #LoggedIn >
       

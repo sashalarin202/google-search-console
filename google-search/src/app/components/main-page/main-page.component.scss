@@ -1,0 +1,46 @@
+// Ваш компонент или элемент, содержащий кнопку
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh; // Устанавливаем высоту, чтобы занять всю видимую высоту экрана
+    background-color: #f0f0f0; // Серый цвет фона
+      // Стили для кнопки
+    .mat-dialog-btn {
+        height: 50px;
+        text-align: center;
+        background-color: rgb(97, 97, 97); // Серый цвет фона кнопки
+        border: 4px solid  rgb(97, 97, 97); // Убираем границу кнопки
+        border-radius: 10px ;
+        margin: 10px;
+        padding: 10px 20px; // Размеры отступов
+        cursor: pointer; // Устанавливаем указатель на кнопку
+        p{
+            margin: 0;
+            color: white; // Белый цвет текста на кнопке
+        }
+    }
+    .container-discription{
+        display: flex;
+        flex-direction: row;
+        width: 277px;
+        img{
+            margin: 10px;
+            height: 20px;
+            width: 20px;
+        }
+        p{
+            font-size: 12px;
+            color: grey;
+        }
+    }
+  }
+  
+
+  
+  // Стили для вложенного элемента p
+  .wrapper {
+    text-align: center; // Выравниваем текст по центру
+  }
+  
