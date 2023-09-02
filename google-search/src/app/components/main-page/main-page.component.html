@@ -1,0 +1,10 @@
+<button 
+    mat-raised-button
+    *ngIf="isLoggedIn()"
+    class="mat-dialog-btn mat-dialog-googleBtn" 
+    (click)="authService.GoogleAuth()" 
+    [mat-dialog-close]>
+    <div class="wrapper">
+        <p>Conect Google Search Console</p>
+    </div>
+</button>
