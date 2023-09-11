@@ -59,16 +59,7 @@ export class AuthService {
       .then((result) => {
         this.router.navigate(['dashboard']);
         this.SetUserData(result.user);
-        this.fetchData(result, '2023-06-07','2023-09-07', ['PAGE'], 10).subscribe(
-          (response) => {
-            // Обработка данных из ответа
-            console.log('Ответ от сервера:', response);
-          },
-          (error) => {
-            // Обработка ошибок
-            console.error('Произошла ошибка при выполнении запроса:', error);
-          }
-        )
+        localStorage.setItem('result', JSON.stringify(result))
       })
       .catch((error) => {
         this.snackBar.open(error.message, '', { duration: 3000 });

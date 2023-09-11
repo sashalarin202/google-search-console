@@ -6,8 +6,8 @@ import { MainPageComponent } from './components/main-page/main-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/mainPage', pathMatch: 'full' },
-  { path: 'mainPage', component: MainPageComponent },
-  { path: 'dashboard', component: DashboardComponent, canActivate: [AuthGuard] },
+  { path: 'dashboard', component: MainPageComponent },
+  { path: 'mainpage', component: DashboardComponent, canActivate: [AuthGuard] },
 ];
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
