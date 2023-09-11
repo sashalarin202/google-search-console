@@ -35,7 +35,6 @@ export class MainPageComponent implements AfterViewInit {
   constructor(public dialog: MatDialog, public authService: AuthService, private _liveAnnouncer: LiveAnnouncer) {}
 
   isLoggedIn(){
-    console.log(this.authService.isLoggedIn)
      return !this.authService.isLoggedIn
   }
   displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];

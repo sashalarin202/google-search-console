@@ -10,7 +10,6 @@ export class HeaderComponent {
   constructor( public authService: AuthService){ console.log('header') }
 
   isLoggedIn(){
-    console.log(this.authService.isLoggedIn)
      return !this.authService.isLoggedIn
   }
 }

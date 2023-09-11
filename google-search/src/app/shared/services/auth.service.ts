@@ -8,6 +8,8 @@ import {
 } from '@angular/fire/compat/firestore';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
 @Injectable({
   providedIn: 'root',
 })
@@ -19,6 +21,7 @@ export class AuthService {
     public router: Router,
     public ngZone: NgZone, // NgZone service to remove outside scope warning
     private snackBar: MatSnackBar,
+    private http: HttpClient
   ) {
     /* Saving user data in localstorage when 
     logged in and setting up null when logged out */
@@ -40,10 +43,15 @@ export class AuthService {
   }
   // Sign in with Google
   GoogleAuth() {
-    return this.AuthLogin(new auth.GoogleAuthProvider()).then((res: any) => {
-      this.router.navigate(['dashboard']);
-    });
+    const provider = new auth.GoogleAuthProvider();
+    provider.addScope('https://www.googleapis.com/auth/webmasters'); // Добавляем требуемую область (scope)
+
+    return this.AuthLogin(provider).then((res: any) => {
+    this.router.navigate(['dashboard']);
+  });
   }
+
+  private apiUrl = 'https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Aenguide.pl/searchAnalytics/query';
   // Auth logic to run auth providers
   AuthLogin(provider: any) {
     return this.afAuth
@@ -51,6 +59,16 @@ export class AuthService {
       .then((result) => {
         this.router.navigate(['dashboard']);
         this.SetUserData(result.user);
+        this.fetchData(result, '2023-06-07','2023-09-07', ['PAGE'], 10).subscribe(
+          (response) => {
+            // Обработка данных из ответа
+            console.log('Ответ от сервера:', response);
+          },
+          (error) => {
+            // Обработка ошибок
+            console.error('Произошла ошибка при выполнении запроса:', error);
+          }
+        )
       })
       .catch((error) => {
         this.snackBar.open(error.message, '', { duration: 3000 });
@@ -70,6 +88,7 @@ export class AuthService {
       photoURL: user.photoURL,
       emailVerified: user.emailVerified,
     };
+    
     return userRef.set(userData, {
       merge: true,
     });
@@ -80,5 +99,21 @@ export class AuthService {
       localStorage.removeItem('user');
       this.router.navigate(['mainPage']);
     });
+  }
+
+  fetchData(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${accessToken.credential.accessToken}`,
+      'Content-Type': 'application/json',
+    });
+
+    const body = {
+      startDate,
+      endDate,
+      dimensions,
+      rowLimit,
+    };
+
+    return this.http.post(this.apiUrl, body, { headers });
   }
 }
