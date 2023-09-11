@@ -103,6 +103,7 @@ export class AuthService {
       endDate,
       dimensions,
       rowLimit,
+      metrics: "clicks"
     };
 
     return this.http.post(this.apiUrl, body, { headers });

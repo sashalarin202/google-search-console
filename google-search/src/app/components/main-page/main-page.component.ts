@@ -1,8 +1,10 @@
+import { HttpHeaders } from '@angular/common/http';
 import { AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Observable, forkJoin } from 'rxjs';
 import { AuthService } from 'src/app/shared/services/auth.service';
 
 
@@ -29,7 +31,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   isLoggedIn(){
      return !this.authService.isLoggedIn
   }
-  displayedColumns: string[] = ['key', 'clicks', 'impressions', 'position'];
+  displayedColumns: string[] = [ 'date', 'key', 'clicks', 'impressions', 'position',];
 
   dataSource = new MatTableDataSource<PeriodicElement>();
 
@@ -37,24 +39,87 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit(){
+
     const result = JSON.parse(localStorage.getItem('result')!)
-    this.authService.fetchData(result, '2023-06-07','2023-09-07', ['PAGE'], 100).subscribe(
-      (response) => {
-        // Обработка данных из ответа
-        this.response = response.rows.map((row: any) => ({
-          key: row.keys[0], // Преобразуем массив в строку
-          clicks: row.clicks,
-          impressions: row.impressions,
-          position: row.position
-        }));
-        console.log(this.response)
-        this.dataSource = new MatTableDataSource(this.response);
+    const currentDate = new Date();
+    const lastThreeMonthsData: Observable<any>[] = [];
+
+    for (let i = 0; i < 90; i += 4) {
+      // Вычислить начальную и конечную даты для каждого периода (4 дня)
+      const endDate = currentDate.toISOString().split('T')[0];
+      currentDate.setDate(currentDate.getDate() - 4);
+      const startDate = currentDate.toISOString().split('T')[0];
+
+      // Отправить запрос для текущего периода и добавить его в массив запросов
+      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 15);
+
+      lastThreeMonthsData.push(dataForPeriod$);
+    }
+
+    // Использовать forkJoin для отправки всех запросов параллельно
+    forkJoin(lastThreeMonthsData).subscribe(
+      (responses) => {
+        // Обработка данных из ответов (responses)
+        const combinedData:any = [];
+        responses.forEach(response => {
+          if (response && response.rows) {
+            const periodData = response.rows.map((row: any) => ({
+              key: row.keys[0],
+              date: row.keys[1],
+              clicks: row.clicks,
+              impressions: row.impressions,
+              position: row.position
+            }));
+            combinedData.push(...periodData); // Объединяем данные
+          }
+        });
+        combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        console.log(combinedData)
+
+        this.dataSource = new MatTableDataSource(combinedData);
       },
       (error) => {
         // Обработка ошибок
-        console.error('Произошла ошибка при выполнении запроса:', error);
+        console.error('Произошла ошибка при выполнении запросов:', error);
       }
-    )
+    );
+  }
+
+  // Функция для отправки запроса на получение данных за определенный период
+  fetchDataForPeriod(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${accessToken.credential.accessToken}`,
+      'Content-Type': 'application/json',
+    });
+
+    const body = {
+      startDate,
+      endDate,
+      dimensions,
+      rowLimit,
+      metrics: "clicks"
+    };
+    const result = JSON.parse(localStorage.getItem('result')!)
+
+    return this.authService.fetchData(result, startDate, endDate, ["query", "date"], 15);
+    // this.authService.fetchData(result, startDate, endDate, ["query", "date"], 15).subscribe(
+    //   (response) => {
+    //     // Обработка данных из ответа
+    //     this.response = response.rows.map((row: any) => ({
+    //       key: row.keys[0],
+    //       date: row.keys[1],
+    //       clicks: row.clicks,
+    //       impressions: row.impressions,
+    //       position: row.position
+    //     }));
+    //     console.log(this.sortByDate(this.response))
+    //     this.dataSource = new MatTableDataSource(this.response);
+    //   },
+    //   (error) => {
+    //     // Обработка ошибок
+    //     console.error('Произошла ошибка при выполнении запроса:', error);
+    //   }
+    // )
   }
 
   ngAfterViewInit() {
@@ -62,7 +127,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     this.dataSource.paginator = this.paginator;
   }
 
-  /** Announce the change in sort state for assistive technology. */
   announceSortChange(sortState: Sort) {
     const data = [...this.response]; // Копия данных
   if (sortState.direction) {
@@ -84,5 +148,13 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   this.dataSource = new MatTableDataSource(data);
   }
   
+  sortByDate(data: any[]) {
+    data.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+
+        return dateA.getTime() - dateB.getTime();
+    });
+}
 }
 
