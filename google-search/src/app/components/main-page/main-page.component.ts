@@ -1,9 +1,8 @@
-import { LiveAnnouncer } from '@angular/cdk/a11y';
-import {AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import { AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort, MatSortModule, Sort } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { MatSort, Sort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 import { AuthService } from 'src/app/shared/services/auth.service';
 
 
@@ -20,12 +19,11 @@ export interface PeriodicElement {
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
 })
-export class MainPageComponent implements OnInit {
+export class MainPageComponent implements OnInit, AfterViewInit  {
   
   response:any
   constructor(public dialog: MatDialog,
     public authService: AuthService,
-    private _liveAnnouncer: LiveAnnouncer
   ) {}
 
   isLoggedIn(){
@@ -33,7 +31,7 @@ export class MainPageComponent implements OnInit {
   }
   displayedColumns: string[] = ['key', 'clicks', 'impressions', 'position'];
 
-  dataSource = new MatTableDataSource();
+  dataSource = new MatTableDataSource<PeriodicElement>();
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
