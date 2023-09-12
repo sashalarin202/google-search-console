@@ -74,7 +74,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
           }
         });
         combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        console.log(combinedData)
+        console.log(this.transformData(combinedData))
 
         this.dataSource = new MatTableDataSource(combinedData);
       },
@@ -102,24 +102,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const result = JSON.parse(localStorage.getItem('result')!)
 
     return this.authService.fetchData(result, startDate, endDate, ["query", "date"], 15);
-    // this.authService.fetchData(result, startDate, endDate, ["query", "date"], 15).subscribe(
-    //   (response) => {
-    //     // Обработка данных из ответа
-    //     this.response = response.rows.map((row: any) => ({
-    //       key: row.keys[0],
-    //       date: row.keys[1],
-    //       clicks: row.clicks,
-    //       impressions: row.impressions,
-    //       position: row.position
-    //     }));
-    //     console.log(this.sortByDate(this.response))
-    //     this.dataSource = new MatTableDataSource(this.response);
-    //   },
-    //   (error) => {
-    //     // Обработка ошибок
-    //     console.error('Произошла ошибка при выполнении запроса:', error);
-    //   }
-    // )
   }
 
   ngAfterViewInit() {
@@ -155,6 +137,29 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
 
         return dateA.getTime() - dateB.getTime();
     });
-}
+  }
+  transformData(data: any[]): any[] {
+    const groupedData: { [key: string]: { date: string; data: { key: string; clicks: number }[] } } = {};
+
+    data.forEach((entry) => {
+      const date = entry.date;
+      const key = entry.key;
+      const clicks = entry.clicks;
+
+      if (!groupedData[date]) {
+        groupedData[date] = { date: date, data: [] };
+      }
+
+      const existingEntry = groupedData[date].data.find((item) => item.key === key);
+      if (existingEntry) {
+        existingEntry.clicks += clicks;
+      } else {
+        groupedData[date].data.push({ key: key, clicks: clicks });
+      }
+    });
+
+    const result = Object.values(groupedData);
+    return result;
+  }
 }
 
