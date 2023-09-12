@@ -4,7 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable, forkJoin, never } from 'rxjs';
 import { AuthService } from 'src/app/shared/services/auth.service';
 
 
@@ -16,12 +16,16 @@ export interface PeriodicElement {
   position: number;
 }
 
+
 @Component({
   selector: 'app-main-page',
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit, AfterViewInit  {
+  tableData = [] as {date: string , data: { key: string; clicks: number }[]}[];
+  
+  combinedDataConcat:any = [];
   
   response:any
   constructor(public dialog: MatDialog,
@@ -44,7 +48,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
 
-    for (let i = 0; i < 90; i += 4) {
+    for (let i = 0; i < 2; i += 4) {
       // Вычислить начальную и конечную даты для каждого периода (4 дня)
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 4);
@@ -74,7 +78,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
           }
         });
         combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        console.log(this.transformData(combinedData))
+        this.transformData(combinedData)
 
         this.dataSource = new MatTableDataSource(combinedData);
       },
@@ -138,7 +142,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         return dateA.getTime() - dateB.getTime();
     });
   }
-  transformData(data: any[]): any[] {
+  transformData(data: any[]): any {
     const groupedData: { [key: string]: { date: string; data: { key: string; clicks: number }[] } } = {};
 
     data.forEach((entry) => {
@@ -159,7 +163,42 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     });
 
     const result = Object.values(groupedData);
-    return result;
+    const dataResult =  this.combineKeys(result);
+
+    return dataResult
+  }
+
+  combineKeys(data: any) {
+    const allKeys = new Set<string>();
+  
+    // Собираем все ключи во всех датах
+    data.forEach((entry: any) => {
+      entry.data.forEach((item: { key: string; clicks: number }) => {
+        allKeys.add(item.key);
+      });
+    });
+  
+    this.combinedDataConcat = data.map((entry: any) => {
+      const combinedEntry = {
+        date: entry.date,
+        data: [] as { key: string; clicks: number }[],
+      };
+  
+      allKeys.forEach((key) => {
+        const matchingItem = entry.data.find((item:any) => item.key === key);
+  
+        if (matchingItem) {
+          combinedEntry.data.push(matchingItem);
+        } else {
+          combinedEntry.data.push({ key, clicks: 0 });
+        }
+      });
+
+      this.tableData.push(combinedEntry)
+      console.log(this.tableData)
+  
+      return combinedEntry;
+    });
   }
 }
 
