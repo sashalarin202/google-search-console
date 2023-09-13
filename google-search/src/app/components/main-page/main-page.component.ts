@@ -24,6 +24,7 @@ export interface PeriodicElement {
 })
 export class MainPageComponent implements OnInit, AfterViewInit  {
   tableData = [] as {date: string , data: { key: string; clicks: number }[]}[];
+  displayedColumns: string[] = [];
   
   combinedDataConcat:any = [];
   
@@ -35,7 +36,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   isLoggedIn(){
      return !this.authService.isLoggedIn
   }
-  displayedColumns: string[] = [ 'date', 'key', 'clicks', 'impressions', 'position',];
 
   dataSource = new MatTableDataSource<PeriodicElement>();
 
@@ -81,6 +81,15 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         this.transformData(combinedData)
 
         this.dataSource = new MatTableDataSource(combinedData);
+        console.log(this.tableData)
+        // for (const entry of this.tableData) {
+        //   const date: string = entry.date;
+        //   this.displayedColumns.push(date);
+        // }
+        this.displayedColumns = this.tableData.map((entry) => entry.date);
+        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
+        console.log(this.displayedColumns)
+
       },
       (error) => {
         // Обработка ошибок
@@ -195,7 +204,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
       });
 
       this.tableData.push(combinedEntry)
-      console.log(this.tableData)
   
       return combinedEntry;
     });
