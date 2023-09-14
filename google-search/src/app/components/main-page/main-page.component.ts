@@ -167,7 +167,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
 
     // Заполнение данных из исходных данных
     data.forEach(item => {
-      transformedData[item.key][item.date] = item.clicks.toString();
+      transformedData[item.key][item.date] = Math.round(item.position.toString());
     });
 
     // Преобразование данных в желаемый формат
