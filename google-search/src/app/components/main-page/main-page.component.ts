@@ -48,7 +48,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
 
-    for (let i = 0; i < 2; i += 4) {
+    for (let i = 0; i < 90; i += 4) {
       // Вычислить начальную и конечную даты для каждого периода (4 дня)
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 4);
@@ -81,14 +81,10 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         this.transformData(combinedData)
 
         this.dataSource = new MatTableDataSource(combinedData);
-        console.log(this.tableData)
-        // for (const entry of this.tableData) {
-        //   const date: string = entry.date;
-        //   this.displayedColumns.push(date);
-        // }
-        this.displayedColumns = this.tableData.map((entry) => entry.date);
-        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
+  
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");;
         console.log(this.displayedColumns)
+        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
 
       },
       (error) => {
@@ -151,62 +147,37 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         return dateA.getTime() - dateB.getTime();
     });
   }
-  transformData(data: any[]): any {
-    const groupedData: { [key: string]: { date: string; data: { key: string; clicks: number }[] } } = {};
 
-    data.forEach((entry) => {
-      const date = entry.date;
-      const key = entry.key;
-      const clicks = entry.clicks;
+  transformData(data: any[]): void {
+    const dates = Array.from(new Set(data.map(item => item.date)));
+    const transformedData:any = {};
 
-      if (!groupedData[date]) {
-        groupedData[date] = { date: date, data: [] };
+    // Инициализация данных для всех дат
+    data.forEach(item => {
+      if (!transformedData[item.key]) {
+        transformedData[item.key] = {};
       }
-
-      const existingEntry = groupedData[date].data.find((item) => item.key === key);
-      if (existingEntry) {
-        existingEntry.clicks += clicks;
-      } else {
-        groupedData[date].data.push({ key: key, clicks: clicks });
-      }
-    });
-
-    const result = Object.values(groupedData);
-    const dataResult =  this.combineKeys(result);
-
-    return dataResult
-  }
-
-  combineKeys(data: any) {
-    const allKeys = new Set<string>();
-  
-    // Собираем все ключи во всех датах
-    data.forEach((entry: any) => {
-      entry.data.forEach((item: { key: string; clicks: number }) => {
-        allKeys.add(item.key);
+      dates.forEach(date => {
+        transformedData[item.key][date] = '0';
       });
     });
-  
-    this.combinedDataConcat = data.map((entry: any) => {
-      const combinedEntry = {
-        date: entry.date,
-        data: [] as { key: string; clicks: number }[],
-      };
-  
-      allKeys.forEach((key) => {
-        const matchingItem = entry.data.find((item:any) => item.key === key);
-  
-        if (matchingItem) {
-          combinedEntry.data.push(matchingItem);
-        } else {
-          combinedEntry.data.push({ key, clicks: 0 });
-        }
-      });
 
-      this.tableData.push(combinedEntry)
-  
-      return combinedEntry;
+    // Заполнение данных из исходных данных
+    data.forEach(item => {
+      transformedData[item.key][item.date] = item.clicks.toString();
     });
+
+    // Преобразование данных в желаемый формат
+    const result = Object.keys(transformedData).map(key => {
+      const obj:any = { key };
+      dates.forEach(date => {
+        obj[date] = transformedData[key][date];
+      });
+      return obj;
+    });
+
+    console.log(result)
+    this.tableData = result
   }
 }
 
