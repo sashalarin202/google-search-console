@@ -25,6 +25,7 @@ export interface PeriodicElement {
 export class MainPageComponent implements OnInit, AfterViewInit  {
   tableData = [] as {date: string , data: { key: string; clicks: number }[]}[];
   displayedColumns: string[] = [];
+  keyColumns:string[] = []
   
   combinedDataConcat:any = [];
   
@@ -82,7 +83,9 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");;
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");
+        this.keyColumns = ['key', ...this.displayedColumns];
+
         console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
 

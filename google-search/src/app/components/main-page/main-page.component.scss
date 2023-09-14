@@ -3,6 +3,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+
     flex-direction: column;
     height: 100vh; // Устанавливаем высоту, чтобы занять всю видимую высоту экрана
     background-color: #f0f0f0; // Серый цвет фона
@@ -36,7 +37,6 @@
         }
     }
   }
-  
 
   
   // Стили для вложенного элемента p
@@ -51,8 +51,9 @@
   }
 
   .example-container {
-    height: 100vh;
-    width: 100vw;
+    margin: 0 auto;
+    height: 90vh;
+    width: 90vw;
     max-width: 100%;
     overflow: auto;
   }
@@ -76,4 +77,11 @@
   
   .mat-mdc-table-sticky-border-elem-left {
     border-right: 1px solid #e0e0e0;
+  }
+
+  .mat-header-cell.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: white; /* Установите цвет фона, который вам нужен */
   }
