@@ -32,4 +32,11 @@ section {
     justify-content: center;
     width: 120px;
   }
+
+  .sticky-button-container {
+    position: fixed; /* Зафиксировать элемент */
+    top: 10px; /* Отступ сверху */
+    left: 10px; /* Отступ слева */
+    z-index: 9999; /* Установите z-index, если это необходимо */
+  }
   

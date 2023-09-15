@@ -49,14 +49,26 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
 
-    for (let i = 0; i < 90; i += 4) {
+    const siteList = this.authService.getSearchConsoleDomains(result)
+    if (this.authService.isLoggedIn) {
+      this.authService.getSearchConsoleDomains(result).subscribe(
+        (domains) => {
+          // Обработайте полученные данные о доменах
+          console.log('Домены пользователя:', domains);
+        },
+        (error) => {
+          // Обработайте ошибку
+          console.error('Произошла ошибка при получении доменов:', error);
+        }
+      );
+    }
+    for (let i = 0; i < 30; i += 1) {
       // Вычислить начальную и конечную даты для каждого периода (4 дня)
       const endDate = currentDate.toISOString().split('T')[0];
-      currentDate.setDate(currentDate.getDate() - 4);
+      currentDate.setDate(currentDate.getDate() - 1);
       const startDate = currentDate.toISOString().split('T')[0];
 
-      // Отправить запрос для текущего периода и добавить его в массив запросов
-      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 15);
+      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000);
 
       lastThreeMonthsData.push(dataForPeriod$);
     }
@@ -109,11 +121,11 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
       endDate,
       dimensions,
       rowLimit,
-      metrics: "clicks"
+      metrics: "position"
     };
     const result = JSON.parse(localStorage.getItem('result')!)
 
-    return this.authService.fetchData(result, startDate, endDate, ["query", "date"], 15);
+    return this.authService.fetchData(result, startDate, endDate, ["query", "date"], rowLimit);
   }
 
   ngAfterViewInit() {
@@ -161,7 +173,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         transformedData[item.key] = {};
       }
       dates.forEach(date => {
-        transformedData[item.key][date] = '0';
+        transformedData[item.key][date] = '-';
       });
     });
 

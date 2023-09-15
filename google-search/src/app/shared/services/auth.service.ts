@@ -14,6 +14,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AuthService {
+  private searchConsoleApiUrl = 'https://www.googleapis.com/webmasters/v3/sites';
+  private apiUrl = 'https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Aenguide.pl/searchAnalytics/query';
   userData: any; // Save logged in user data
   constructor(
     public afs: AngularFirestore, // Inject Firestore service
@@ -51,7 +53,6 @@ export class AuthService {
   });
   }
 
-  private apiUrl = 'https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Aenguide.pl/searchAnalytics/query';
   // Auth logic to run auth providers
   AuthLogin(provider: any) {
     return this.afAuth
@@ -107,5 +108,14 @@ export class AuthService {
     };
 
     return this.http.post(this.apiUrl, body, { headers });
+  }
+
+  getSearchConsoleDomains(result: any): Observable<any> {
+    const headers = new HttpHeaders({
+      Authorization: `Bearer ${result.credential.accessToken}`,
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.get(this.searchConsoleApiUrl, { headers });
   }
 }

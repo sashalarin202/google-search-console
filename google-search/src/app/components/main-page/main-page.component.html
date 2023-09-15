@@ -16,7 +16,6 @@
 
 <ng-template #LoggedIn class="container-dashboard">
       
-    <section class="example-container mat-elevation-z8" tabindex="0">
       <table mat-table [dataSource]="tableData">
 
         <ng-container matColumnDef="key" sticky>
@@ -30,7 +29,7 @@
             *matCellDef="let element"
             style="text-align: center;"
             [ngClass]="{
-              'green-background': element[column] >= 0 && element[column] < 3,
+              'green-background': element[column] >= 1 && element[column] < 3,
               'yellow-background': element[column] >= 3 && element[column] < 10,
               'red-background': element[column] >= 10
             }"
@@ -41,6 +40,5 @@
         <tr mat-header-row *matHeaderRowDef="keyColumns; sticky:true"></tr>
         <tr mat-row *matRowDef="let row; columns: keyColumns;"></tr>
       </table>
-    </section>
     
 </ng-template>
