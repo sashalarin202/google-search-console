@@ -23,6 +23,8 @@ import { MatTableModule } from '@angular/material/table';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { HttpClientModule } from '@angular/common/http';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+
 
 
 
@@ -40,6 +42,7 @@ import { HttpClientModule } from '@angular/common/http';
     MainPageComponent,
   ],
   imports: [
+    MatProgressSpinnerModule,
     HttpClientModule,
     MatSortModule,
     MatPaginatorModule,
