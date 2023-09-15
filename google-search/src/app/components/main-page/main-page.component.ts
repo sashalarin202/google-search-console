@@ -124,45 +124,48 @@ export class MainPageComponent implements AfterViewInit  {
   }
 
   transformData(data: any[]): void {
+    console.log("data", data);
     const dates = Array.from(new Set(data.map(item => item.date)));
     const transformedData: any = {};
-  
+
     // Инициализация данных для всех дат
     data.forEach(item => {
-      if (!transformedData[item.key]) {
-        transformedData[item.key] = {};
-      }
-      dates.forEach(date => {
-        transformedData[item.key][date] = '-';
-      });
+        if (!transformedData[item.key]) {
+            transformedData[item.key] = {};
+            transformedData[item.key].impressions = 0;
+            transformedData[item.key].clicks = 0; // Инициализация счетчика кликов
+        }
+        dates.forEach(date => {
+            transformedData[item.key][date] = '-';
+        });
     });
-  
-    // Заполнение данных из исходных данных и вычисление суммы impressions
+
+    // Заполнение данных из исходных данных и вычисление суммы impressions и clicks
     data.forEach(item => {
-      if (!transformedData[item.key].impressions) {
-        transformedData[item.key].impressions = 0;
-      }
-      transformedData[item.key][item.date] = Math.round(item.position.toString());
-      transformedData[item.key].impressions += item.impressions;
+        transformedData[item.key][item.date] = Math.round(item.position.toString());
+        transformedData[item.key].impressions += item.impressions;
+        transformedData[item.key].clicks += item.clicks; // Увеличение счетчика кликов
     });
-  
+
     // Преобразование данных в желаемый формат
     const result = Object.keys(transformedData).map(key => {
-      const obj: any = { key };
-      dates.forEach(date => {
-        obj[date] = transformedData[key][date];
-      });
-      obj.impressions = transformedData[key].impressions; // Добавление суммы impressions
-      return obj;
+        const obj: any = { key };
+        dates.forEach(date => {
+            obj[date] = transformedData[key][date];
+        });
+        obj.impressions = transformedData[key].impressions;
+        obj.clicks = transformedData[key].clicks; // Добавление суммы кликов
+        return obj;
     });
-  
+
     // Сортировка данных по убыванию impressions
     result.sort((a, b) => b.impressions - a.impressions);
-  
-    // console.log(result);
-    this.tableData = result;
-  }
 
+    console.log("result", result);
+    this.tableData = result;
+}
+
+  
   selectDomen(domen:any){
     this.selectedDomen = true
     this.tableData = []
@@ -194,7 +197,8 @@ export class MainPageComponent implements AfterViewInit  {
               date: row.keys[1],
               clicks: row.clicks,
               impressions: row.impressions,
-              position: row.position
+              position: row.position,
+              ctr: Math.round(row.ctr*100),///////////////////////////////////////////////////////////////////////////////////////
             }));
             combinedData.push(...periodData); // Объединяем данные
           }
@@ -204,10 +208,10 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
-        this.keyColumns = ['key','impressions', ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks");
+        this.keyColumns = ['key','impressions', "clicks", ...this.displayedColumns];
 
-        console.log(this.displayedColumns)
+        // console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
 
       },
@@ -233,7 +237,6 @@ export class MainPageComponent implements AfterViewInit  {
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 1);
       const startDate = currentDate.toISOString().split('T')[0];
-      console.log("startDate",startDate,"endDate",endDate)
 
       const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen);
 
@@ -250,7 +253,8 @@ export class MainPageComponent implements AfterViewInit  {
               date: row.keys[1],
               clicks: row.clicks,
               impressions: row.impressions,
-              position: row.position
+              position: row.position,
+              ctr: Math.round(row.ctr*100),
             }));
             combinedData.push(...periodData); // Объединяем данные
           }
@@ -260,8 +264,8 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
-        this.keyColumns = ['key','impressions', ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks");
+        this.keyColumns = ['key', 'impressions', "clicks", ...this.displayedColumns];
 
         console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
@@ -293,7 +297,7 @@ export class MainPageComponent implements AfterViewInit  {
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 1);
       const startDate = currentDate.toISOString().split('T')[0];
-      console.log("startDate",startDate,"endDate",endDate)
+      // console.log("startDate",startDate,"endDate",endDate)
 
       const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen);
 
@@ -310,7 +314,8 @@ export class MainPageComponent implements AfterViewInit  {
               date: row.keys[1],
               clicks: row.clicks,
               impressions: row.impressions,
-              position: row.position
+              position: row.position,
+              ctr: Math.round(row.ctr*100),
             }));
             combinedData.push(...periodData); // Объединяем данные
           }
@@ -320,10 +325,11 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
-        this.keyColumns = ['key','impressions', ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks"
+         );
+        this.keyColumns = ['key','impressions', "clicks", ...this.displayedColumns];
 
-        console.log(this.displayedColumns)
+        // console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
 
       },
