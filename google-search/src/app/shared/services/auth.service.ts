@@ -95,7 +95,7 @@ export class AuthService {
 
   fetchData(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number, domen:string): Observable<any> {
     const headers = new HttpHeaders({
-      Authorization: `Bearer ${accessToken.credential.accessToken}`,
+      Authorization: `Bearer ${accessToken.credential?.accessToken}`,
       'Content-Type': 'application/json',
     });
 
@@ -111,8 +111,8 @@ export class AuthService {
   }
 
   getSearchConsoleDomains(result: any): Observable<any> {
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${result.credential.accessToken}`,
+      const headers = new HttpHeaders({
+      Authorization: `Bearer ${result.credential?.accessToken}`,
       'Content-Type': 'application/json',
     });
 

@@ -16,7 +16,7 @@
 
 <ng-template #LoggedIn class="container-dashboard">
   <mat-form-field>
-    <mat-label>Select Domen</mat-label>
+    <mat-label>Select Domain</mat-label>
     <mat-select (selectionChange)="selectDomen($event)" [(ngModel)]="selectedDomain">
       <mat-option *ngFor="let domen of domenList" [value]="domen">
         {{domen}}

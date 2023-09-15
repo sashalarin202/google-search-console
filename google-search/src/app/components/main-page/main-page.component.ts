@@ -23,7 +23,7 @@ export interface PeriodicElement {
   templateUrl: './main-page.component.html',
   styleUrls: ['./main-page.component.scss'],
 })
-export class MainPageComponent implements OnInit, AfterViewInit  {
+export class MainPageComponent implements AfterViewInit  {
   counterWeeks: number = 1
   selectedDomen:boolean = false
   selectedDomain: string;
@@ -43,7 +43,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const result = JSON.parse(localStorage.getItem('result')!)
 
 
-    this.authService.getSearchConsoleDomains(result)
     if (this.authService.isLoggedIn) {
       this.authService.getSearchConsoleDomains(result).subscribe(
         (domains) => {
@@ -69,9 +68,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
-  ngOnInit(){
-
-  }
 
   // Функция для отправки запроса на получение данных за определенный период
   fetchDataForPeriod(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number, domen:string): Observable<any> {
@@ -128,7 +124,6 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   }
 
   transformData(data: any[]): void {
-    // console.log("data----", data);
     const dates = Array.from(new Set(data.map(item => item.date)));
     const transformedData: any = {};
   
