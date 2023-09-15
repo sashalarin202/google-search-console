@@ -70,5 +70,7 @@
 
 <ng-template #loader>
   <!-- Отображение лоадера, когда нет данных -->
+  <ng-container *ngIf="selectedDomain">
     <mat-spinner></mat-spinner>
+  </ng-container>
 </ng-template>
