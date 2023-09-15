@@ -172,7 +172,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const result = JSON.parse(localStorage.getItem('result')!)
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
-    for (let i = 0; i < 13; i += 1) {
+    for (let i = 0; i < 12; i += 1) {
       // Вычислить начальную и конечную даты для каждого периода (4 дня)
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 1);
