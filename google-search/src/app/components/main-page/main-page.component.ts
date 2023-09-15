@@ -125,9 +125,10 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   }
 
   transformData(data: any[]): void {
+    console.log("data----", data);
     const dates = Array.from(new Set(data.map(item => item.date)));
-    const transformedData:any = {};
-
+    const transformedData: any = {};
+  
     // Инициализация данных для всех дат
     data.forEach(item => {
       if (!transformedData[item.key]) {
@@ -137,23 +138,31 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         transformedData[item.key][date] = '-';
       });
     });
-
-    // Заполнение данных из исходных данных
+  
+    // Заполнение данных из исходных данных и вычисление суммы impressions
     data.forEach(item => {
+      if (!transformedData[item.key].impressions) {
+        transformedData[item.key].impressions = 0;
+      }
       transformedData[item.key][item.date] = Math.round(item.position.toString());
+      transformedData[item.key].impressions += item.impressions;
     });
-
+  
     // Преобразование данных в желаемый формат
     const result = Object.keys(transformedData).map(key => {
-      const obj:any = { key };
+      const obj: any = { key };
       dates.forEach(date => {
         obj[date] = transformedData[key][date];
       });
+      obj.impressions = transformedData[key].impressions; // Добавление суммы impressions
       return obj;
     });
-
-    console.log(result)
-    this.tableData = result
+  
+    // Сортировка данных по убыванию impressions
+    result.sort((a, b) => b.impressions - a.impressions);
+  
+    console.log(result);
+    this.tableData = result;
   }
 
   selectDomen(domen:any){
@@ -163,7 +172,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     const result = JSON.parse(localStorage.getItem('result')!)
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
-    for (let i = 0; i < 12; i += 1) {
+    for (let i = 0; i < 13; i += 1) {
       // Вычислить начальную и конечную даты для каждого периода (4 дня)
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 1);
@@ -196,8 +205,8 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");
-        this.keyColumns = ['key', ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
+        this.keyColumns = ['key','impressions', ...this.displayedColumns];
 
         console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
