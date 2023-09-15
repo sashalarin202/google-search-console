@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { HeaderComponent } from './components/header/header.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field'
-import { ReactiveFormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { AngularFireModule } from '@angular/fire/compat';
@@ -43,6 +43,7 @@ import { MatSelectModule } from '@angular/material/select';
     MainPageComponent,
   ],
   imports: [
+    FormsModule,
     MatSelectModule,
     MatProgressSpinnerModule,
     HttpClientModule,

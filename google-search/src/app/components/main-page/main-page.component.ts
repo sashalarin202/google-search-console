@@ -24,7 +24,9 @@ export interface PeriodicElement {
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit, AfterViewInit  {
+  counterWeeks: number = 1
   selectedDomen:boolean = false
+  selectedDomain: string;
   domenList: string[] = []
   tableData = [] as {date: string , data: { key: string; clicks: number }[]}[];
   displayedColumns: string[] = [];
@@ -35,18 +37,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   response:any
   constructor(public dialog: MatDialog,
     public authService: AuthService,
-  ) {}
-
-  isLoggedIn(){
-     return !this.authService.isLoggedIn
-  }
-
-  dataSource = new MatTableDataSource<PeriodicElement>();
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
-
-  ngOnInit(){
+  ) {
     let domenData:any[] = []
 
     const result = JSON.parse(localStorage.getItem('result')!)
@@ -59,7 +50,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
           // Обработайте полученные данные о доменах
           domenData = domains.siteEntry;
           this.domenList = domenData.map(entry=> entry.siteUrl).map((str) => str.replace("sc-domain:", ""));
-          console.log(this.domenList)
+          // console.log(this.domenList)
         },
         (error) => {
           // Обработайте ошибку
@@ -67,6 +58,18 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         }
       );
     }
+  }
+
+  isLoggedIn(){
+     return !this.authService.isLoggedIn
+  }
+
+  dataSource = new MatTableDataSource<PeriodicElement>();
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+
+  ngOnInit(){
 
   }
 
@@ -125,7 +128,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   }
 
   transformData(data: any[]): void {
-    console.log("data----", data);
+    // console.log("data----", data);
     const dates = Array.from(new Set(data.map(item => item.date)));
     const transformedData: any = {};
   
@@ -161,22 +164,23 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     // Сортировка данных по убыванию impressions
     result.sort((a, b) => b.impressions - a.impressions);
   
-    console.log(result);
+    // console.log(result);
     this.tableData = result;
   }
 
   selectDomen(domen:any){
     this.selectedDomen = true
     this.tableData = []
-    console.log(domen.value)
+    // console.log(domen.value)
     const result = JSON.parse(localStorage.getItem('result')!)
     const currentDate = new Date();
     const lastThreeMonthsData: Observable<any>[] = [];
-    for (let i = 0; i < 12; i += 1) {
-      // Вычислить начальную и конечную даты для каждого периода (4 дня)
+
+    for (let i = 0; i < 11; i += 1) {
       const endDate = currentDate.toISOString().split('T')[0];
       currentDate.setDate(currentDate.getDate() - 1);
       const startDate = currentDate.toISOString().split('T')[0];
+      console.log("startDate",startDate,"endDate",endDate)
 
       const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen.value);
 
@@ -218,6 +222,123 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
       }
     );
     this.selectedDomen = false
+  }
+
+  fetchNext10DaysData(domen: string) {
+    
+    console.log(this.counterWeeks)
+    this.selectedDomen = true
+    this.tableData = []
+    const result = JSON.parse(localStorage.getItem('result')!)
+    const currentDate = new Date();
+    currentDate.setDate(currentDate.getDate() - 10*this.counterWeeks - 2);
+    const lastThreeMonthsData: Observable<any>[] = [];
+
+    for (let i = 0; i < 10; i += 1) {
+      const endDate = currentDate.toISOString().split('T')[0];
+      currentDate.setDate(currentDate.getDate() - 1);
+      const startDate = currentDate.toISOString().split('T')[0];
+      console.log("startDate",startDate,"endDate",endDate)
+
+      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen);
+
+      lastThreeMonthsData.push(dataForPeriod$);
+    }
+    forkJoin(lastThreeMonthsData).subscribe(
+      (responses) => {
+        // Обработка данных из ответов (responses)
+        const combinedData:any = [];
+        responses.forEach(response => {
+          if (response && response.rows) {
+            const periodData = response.rows.map((row: any) => ({
+              key: row.keys[0],
+              date: row.keys[1],
+              clicks: row.clicks,
+              impressions: row.impressions,
+              position: row.position
+            }));
+            combinedData.push(...periodData); // Объединяем данные
+          }
+        });
+        combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        this.transformData(combinedData)
+
+        this.dataSource = new MatTableDataSource(combinedData);
+  
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
+        this.keyColumns = ['key','impressions', ...this.displayedColumns];
+
+        console.log(this.displayedColumns)
+        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
+
+      },
+      (error) => {
+        // Обработка ошибок
+        console.error('Произошла ошибка при выполнении запросов:', error);
+      }
+    );
+    this.selectedDomen = false
+    this.counterWeeks = this.counterWeeks + 1;
+  }
+  // Метод для получения данных за предыдущие 10 дней
+  fetchPrevious10DaysData(domen: string) {
+
+    console.log(this.counterWeeks)
+    this.selectedDomen = true
+    this.tableData = []
+    // console.log(domen.value)
+    const result = JSON.parse(localStorage.getItem('result')!)
+    const currentDate = new Date();
+    if(this.counterWeeks!==1){
+      currentDate.setDate(currentDate.getDate() - 10*this.counterWeeks - 2);
+    }
+    const lastThreeMonthsData: Observable<any>[] = [];
+
+    for (let i = 0; i < 10; i += 1) {
+      const endDate = currentDate.toISOString().split('T')[0];
+      currentDate.setDate(currentDate.getDate() - 1);
+      const startDate = currentDate.toISOString().split('T')[0];
+      console.log("startDate",startDate,"endDate",endDate)
+
+      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen);
+
+      lastThreeMonthsData.push(dataForPeriod$);
+    }
+    forkJoin(lastThreeMonthsData).subscribe(
+      (responses) => {
+        // Обработка данных из ответов (responses)
+        const combinedData:any = [];
+        responses.forEach(response => {
+          if (response && response.rows) {
+            const periodData = response.rows.map((row: any) => ({
+              key: row.keys[0],
+              date: row.keys[1],
+              clicks: row.clicks,
+              impressions: row.impressions,
+              position: row.position
+            }));
+            combinedData.push(...periodData); // Объединяем данные
+          }
+        });
+        combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        this.transformData(combinedData)
+
+        this.dataSource = new MatTableDataSource(combinedData);
+  
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions");
+        this.keyColumns = ['key','impressions', ...this.displayedColumns];
+
+        console.log(this.displayedColumns)
+        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
+
+      },
+      (error) => {
+        // Обработка ошибок
+        console.error('Произошла ошибка при выполнении запросов:', error);
+      }
+    );
+    this.selectedDomen = false
+    this.counterWeeks = this.counterWeeks - 1
   }
 }
 

@@ -17,12 +17,23 @@
 <ng-template #LoggedIn class="container-dashboard">
   <mat-form-field>
     <mat-label>Select Domen</mat-label>
-    <mat-select (selectionChange)="selectDomen($event)">
+    <mat-select (selectionChange)="selectDomen($event)" [(ngModel)]="selectedDomain">
       <mat-option *ngFor="let domen of domenList" [value]="domen">
         {{domen}}
       </mat-option>
     </mat-select>
   </mat-form-field>
+  <button mat-raised-button 
+    class="mat-raised-button"
+    [disabled]="!tableData.length || counterWeeks<1"
+    (click)="fetchPrevious10DaysData(selectedDomain)"
+  >
+  Previous 10 days</button>
+  <button mat-raised-button 
+    class="mat-raised-button" 
+    [disabled]="!tableData.length"
+    (click)="fetchNext10DaysData(selectedDomain)"
+  >Next 10 days</button>
 
       <ng-container *ngIf="tableData.length > 0; else loader">
         <table mat-table [dataSource]="tableData">
