@@ -289,7 +289,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     // console.log(domen.value)
     const result = JSON.parse(localStorage.getItem('result')!)
     const currentDate = new Date();
-    if(this.counterWeeks!==1){
+    if(this.counterWeeks!==2){
       currentDate.setDate(currentDate.getDate() - 10*this.counterWeeks - 2);
     }
     const lastThreeMonthsData: Observable<any>[] = [];
