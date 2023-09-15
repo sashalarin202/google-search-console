@@ -24,6 +24,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { HttpClientModule } from '@angular/common/http';
 import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 
 
 
@@ -42,6 +43,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     MainPageComponent,
   ],
   imports: [
+    MatSelectModule,
     MatProgressSpinnerModule,
     HttpClientModule,
     MatSortModule,

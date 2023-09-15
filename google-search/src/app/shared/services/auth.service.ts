@@ -93,7 +93,7 @@ export class AuthService {
     });
   }
 
-  fetchData(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number): Observable<any> {
+  fetchData(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number, domen:string): Observable<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${accessToken.credential.accessToken}`,
       'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export class AuthService {
       metrics: "clicks"
     };
 
-    return this.http.post(this.apiUrl, body, { headers });
+    return this.http.post("https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3A"+domen+"/searchAnalytics/query", body, { headers });
   }
 
   getSearchConsoleDomains(result: any): Observable<any> {

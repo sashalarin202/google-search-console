@@ -15,6 +15,14 @@
   </div>
 
 <ng-template #LoggedIn class="container-dashboard">
+  <mat-form-field>
+    <mat-label>Select Domen</mat-label>
+    <mat-select (selectionChange)="selectDomen($event)">
+      <mat-option *ngFor="let domen of domenList" [value]="domen">
+        {{domen}}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
 
       <ng-container *ngIf="tableData.length > 0; else loader">
         <table mat-table [dataSource]="tableData">
@@ -46,5 +54,5 @@
 
 <ng-template #loader>
   <!-- Отображение лоадера, когда нет данных -->
-  <mat-spinner></mat-spinner>
+    <mat-spinner></mat-spinner>
 </ng-template>

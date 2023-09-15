@@ -1,5 +1,6 @@
 import { HttpHeaders } from '@angular/common/http';
 import { AfterViewInit, Component, OnInit, ViewChild} from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, Sort } from '@angular/material/sort';
@@ -23,6 +24,8 @@ export interface PeriodicElement {
   styleUrls: ['./main-page.component.scss'],
 })
 export class MainPageComponent implements OnInit, AfterViewInit  {
+  selectedDomen:boolean = false
+  domenList: string[] = []
   tableData = [] as {date: string , data: { key: string; clicks: number }[]}[];
   displayedColumns: string[] = [];
   keyColumns:string[] = []
@@ -44,17 +47,19 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
   @ViewChild(MatSort) sort: MatSort;
 
   ngOnInit(){
+    let domenData:any[] = []
 
     const result = JSON.parse(localStorage.getItem('result')!)
-    const currentDate = new Date();
-    const lastThreeMonthsData: Observable<any>[] = [];
 
-    const siteList = this.authService.getSearchConsoleDomains(result)
+
+    this.authService.getSearchConsoleDomains(result)
     if (this.authService.isLoggedIn) {
       this.authService.getSearchConsoleDomains(result).subscribe(
         (domains) => {
           // Обработайте полученные данные о доменах
-          console.log('Домены пользователя:', domains);
+          domenData = domains.siteEntry;
+          this.domenList = domenData.map(entry=> entry.siteUrl).map((str) => str.replace("sc-domain:", ""));
+          console.log(this.domenList)
         },
         (error) => {
           // Обработайте ошибку
@@ -62,55 +67,11 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
         }
       );
     }
-    for (let i = 0; i < 30; i += 1) {
-      // Вычислить начальную и конечную даты для каждого периода (4 дня)
-      const endDate = currentDate.toISOString().split('T')[0];
-      currentDate.setDate(currentDate.getDate() - 1);
-      const startDate = currentDate.toISOString().split('T')[0];
 
-      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000);
-
-      lastThreeMonthsData.push(dataForPeriod$);
-    }
-
-    // Использовать forkJoin для отправки всех запросов параллельно
-    forkJoin(lastThreeMonthsData).subscribe(
-      (responses) => {
-        // Обработка данных из ответов (responses)
-        const combinedData:any = [];
-        responses.forEach(response => {
-          if (response && response.rows) {
-            const periodData = response.rows.map((row: any) => ({
-              key: row.keys[0],
-              date: row.keys[1],
-              clicks: row.clicks,
-              impressions: row.impressions,
-              position: row.position
-            }));
-            combinedData.push(...periodData); // Объединяем данные
-          }
-        });
-        combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-        this.transformData(combinedData)
-
-        this.dataSource = new MatTableDataSource(combinedData);
-  
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");
-        this.keyColumns = ['key', ...this.displayedColumns];
-
-        console.log(this.displayedColumns)
-        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
-
-      },
-      (error) => {
-        // Обработка ошибок
-        console.error('Произошла ошибка при выполнении запросов:', error);
-      }
-    );
   }
 
   // Функция для отправки запроса на получение данных за определенный период
-  fetchDataForPeriod(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number): Observable<any> {
+  fetchDataForPeriod(accessToken: any, startDate: string, endDate: string, dimensions: string[], rowLimit: number, domen:string): Observable<any> {
     const headers = new HttpHeaders({
       Authorization: `Bearer ${accessToken.credential.accessToken}`,
       'Content-Type': 'application/json',
@@ -125,7 +86,7 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
     };
     const result = JSON.parse(localStorage.getItem('result')!)
 
-    return this.authService.fetchData(result, startDate, endDate, ["query", "date"], rowLimit);
+    return this.authService.fetchData(result, startDate, endDate, ["query", "date"], rowLimit, domen);
   }
 
   ngAfterViewInit() {
@@ -193,6 +154,61 @@ export class MainPageComponent implements OnInit, AfterViewInit  {
 
     console.log(result)
     this.tableData = result
+  }
+
+  selectDomen(domen:any){
+    this.selectedDomen = true
+    this.tableData = []
+    console.log(domen.value)
+    const result = JSON.parse(localStorage.getItem('result')!)
+    const currentDate = new Date();
+    const lastThreeMonthsData: Observable<any>[] = [];
+    for (let i = 0; i < 12; i += 1) {
+      // Вычислить начальную и конечную даты для каждого периода (4 дня)
+      const endDate = currentDate.toISOString().split('T')[0];
+      currentDate.setDate(currentDate.getDate() - 1);
+      const startDate = currentDate.toISOString().split('T')[0];
+
+      const dataForPeriod$ = this.fetchDataForPeriod(result, startDate, endDate, ["query", "date"], 10000, domen.value);
+
+      lastThreeMonthsData.push(dataForPeriod$);
+    }
+
+    // Использовать forkJoin для отправки всех запросов параллельно
+    forkJoin(lastThreeMonthsData).subscribe(
+      (responses) => {
+        // Обработка данных из ответов (responses)
+        const combinedData:any = [];
+        responses.forEach(response => {
+          if (response && response.rows) {
+            const periodData = response.rows.map((row: any) => ({
+              key: row.keys[0],
+              date: row.keys[1],
+              clicks: row.clicks,
+              impressions: row.impressions,
+              position: row.position
+            }));
+            combinedData.push(...periodData); // Объединяем данные
+          }
+        });
+        combinedData.sort((a:any, b:any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        this.transformData(combinedData)
+
+        this.dataSource = new MatTableDataSource(combinedData);
+  
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key");
+        this.keyColumns = ['key', ...this.displayedColumns];
+
+        console.log(this.displayedColumns)
+        this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
+
+      },
+      (error) => {
+        // Обработка ошибок
+        console.error('Произошла ошибка при выполнении запросов:', error);
+      }
+    );
+    this.selectedDomen = false
   }
 }
 
