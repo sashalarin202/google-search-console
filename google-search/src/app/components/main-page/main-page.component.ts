@@ -133,28 +133,34 @@ export class MainPageComponent implements AfterViewInit  {
         if (!transformedData[item.key]) {
             transformedData[item.key] = {};
             transformedData[item.key].impressions = 0;
-            transformedData[item.key].clicks = 0; // Инициализация счетчика кликов
+            transformedData[item.key].clicks = 0;
+            transformedData[item.key].ctrSum = 0; // Инициализация суммы ctr
+            transformedData[item.key].ctrCount = 0; // Инициализация счетчика ctr
         }
         dates.forEach(date => {
             transformedData[item.key][date] = '-';
         });
     });
 
-    // Заполнение данных из исходных данных и вычисление суммы impressions и clicks
+    // Заполнение данных из исходных данных и вычисление суммы impressions, clicks и ctr
     data.forEach(item => {
-        transformedData[item.key][item.date] = Math.round(item.position.toString());
+        const roundedPosition = Math.round(item.position);
+        transformedData[item.key][item.date] = roundedPosition;
         transformedData[item.key].impressions += item.impressions;
-        transformedData[item.key].clicks += item.clicks; // Увеличение счетчика кликов
+        transformedData[item.key].clicks += item.clicks;
+        transformedData[item.key].ctrSum += item.ctr; // Суммируем ctr
+        transformedData[item.key].ctrCount += 1; // Увеличиваем счетчик ctr
     });
 
-    // Преобразование данных в желаемый формат
+    // Преобразование данных в желаемый формат и вычисление среднего ctr
     const result = Object.keys(transformedData).map(key => {
         const obj: any = { key };
         dates.forEach(date => {
             obj[date] = transformedData[key][date];
         });
         obj.impressions = transformedData[key].impressions;
-        obj.clicks = transformedData[key].clicks; // Добавление суммы кликов
+        obj.clicks = transformedData[key].clicks;
+        obj.ctr = transformedData[key].ctrSum / transformedData[key].ctrCount; // Вычисляем средний ctr
         return obj;
     });
 
@@ -164,6 +170,7 @@ export class MainPageComponent implements AfterViewInit  {
     console.log("result", result);
     this.tableData = result;
 }
+
 
   
   selectDomen(domen:any){
@@ -208,8 +215,8 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks");
-        this.keyColumns = ['key','impressions', "clicks", ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks" && key !== "ctr");
+        this.keyColumns = ['key','impressions', "clicks", "ctr", ...this.displayedColumns];
 
         // console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
@@ -264,8 +271,8 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks");
-        this.keyColumns = ['key', 'impressions', "clicks", ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks" && key !== "ctr");
+        this.keyColumns = ['key', 'impressions', "clicks","ctr", ...this.displayedColumns];
 
         console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
@@ -325,9 +332,8 @@ export class MainPageComponent implements AfterViewInit  {
 
         this.dataSource = new MatTableDataSource(combinedData);
   
-        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks"
-         );
-        this.keyColumns = ['key','impressions', "clicks", ...this.displayedColumns];
+        this.displayedColumns = Object.keys(this.tableData[0]).filter(key => key !== "key" && key !== "impressions" && key !== "clicks" && key !== "ctr");
+        this.keyColumns = ['key','impressions', "clicks","ctr", ...this.displayedColumns];
 
         // console.log(this.displayedColumns)
         this.dataSource = new MatTableDataSource<PeriodicElement>(combinedData);
