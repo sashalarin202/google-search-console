@@ -59,6 +59,29 @@ export class MainPageComponent implements AfterViewInit  {
     }
   }
 
+  openSelect(){
+    let domenData:any[] = []
+    console.log("open")
+
+    const result = JSON.parse(localStorage.getItem('result')!)
+
+
+    if (this.authService.isLoggedIn) {
+      this.authService.getSearchConsoleDomains(result).subscribe(
+        (domains) => {
+          // Обработайте полученные данные о доменах
+          domenData = domains.siteEntry;
+          this.domenList = domenData.map(entry=> entry.siteUrl).map((str) => str.replace("sc-domain:", "")).sort();
+          // console.log(this.domenList)
+        },
+        (error) => {
+          // Обработайте ошибку
+          console.error('Произошла ошибка при получении доменов:', error);
+        }
+      );
+    }
+  }
+
   isLoggedIn(){
      return !this.authService.isLoggedIn
   }
